@@ -1,0 +1,25 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User sync profile containing portfolio and limit orders",
+      "type": "object",
+      "properties": {
+        "portfolio": {
+          "type": "object",
+          "description": "User's current portfolio state"
+        },
+        "limitOrders": {
+          "type": "array",
+          "description": "Pending limit orders"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User database record containing portfolio and limits"
+    }
+  }
+}
