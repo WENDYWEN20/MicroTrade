@@ -22,6 +22,13 @@ import OrderBookComponent from "./components/OrderBookComponent";
 import TradingPanel from "./components/TradingPanel";
 import StrategiesGuide from "./components/StrategiesGuide";
 import {
+  getOrCreateUserId,
+  savePortfolioToDb,
+  loadPortfolioFromDb,
+  saveLimitOrdersToDb,
+  loadLimitOrdersFromDb,
+} from "./firebase";
+import {
   TrendingUp,
   TrendingDown,
   Sparkles,
@@ -190,6 +197,45 @@ export default function App() {
     takeProfitPct?: number;
   }
   const [limitOrders, setLimitOrders] = useState<LimitOrder[]>([]);
+
+  // Initialize and persist Firebase state
+  const userId = getOrCreateUserId();
+
+  useEffect(() => {
+    const initFirebase = async () => {
+      try {
+        const dbPortfolio = await loadPortfolioFromDb(userId);
+        if (dbPortfolio) {
+          setPortfolio(dbPortfolio);
+        }
+        const dbLimitOrders = await loadLimitOrdersFromDb(userId);
+        if (dbLimitOrders) {
+          setLimitOrders(dbLimitOrders);
+        }
+      } catch (err) {
+        console.error("Failed to load initial state from Firebase:", err);
+      }
+    };
+    initFirebase();
+  }, [userId]);
+
+  // Synchronize local portfolio changes to Firestore
+  useEffect(() => {
+    if (portfolio) {
+      savePortfolioToDb(userId, portfolio).catch((err) => 
+        console.error("Failed to save portfolio to Firebase:", err)
+      );
+    }
+  }, [portfolio, userId]);
+
+  // Synchronize local limit orders changes to Firestore
+  useEffect(() => {
+    if (limitOrders) {
+      saveLimitOrdersToDb(userId, limitOrders).catch((err) => 
+        console.error("Failed to save limit orders to Firebase:", err)
+      );
+    }
+  }, [limitOrders, userId]);
 
   // Backtesting module states
   const [selectedStrategy, setSelectedStrategy] = useState<StrategyType>(StrategyType.SMA_CROSSOVER);
@@ -713,6 +759,15 @@ export default function App() {
               </span>
               <span className="font-mono font-bold text-indigo-600">
                 ${portfolio.balanceUSD.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="flex flex-col border-l border-slate-100 pl-4">
+              <span className="text-slate-400 font-semibold uppercase text-[9px] tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                Firestore Synced
+              </span>
+              <span className="font-mono text-[9px] text-slate-500 max-w-[100px] truncate" title={userId}>
+                UID: {userId}
               </span>
             </div>
           </div>
