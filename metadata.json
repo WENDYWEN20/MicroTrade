@@ -1,0 +1,6 @@
+{
+  "name": "Token Trading & Strategy Hub",
+  "description": "An interactive real-time dashboard for MGC and MES tokens, featuring live simulated charts, multi-indicator strategy backtesting, paper trading, and server-side Gemini AI-powered trading coaching.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
